@@ -59,32 +59,19 @@ function App() {
 
     setSearchedProducts(sortedProducts);
 
-    const resultsCount = sortedProducts.length;
-    let resultsText = '';
-    if (searchTerm === '') {
-      if (resultsCount === 1) {
-        resultsText = '1product';
-      } else {
-        resultsText = `${resultsCount}products`;
-      }
-    }
-    else {
-      if (resultsCount === 1) {
-        resultsText = '1result';
-      } else if (resultsCount !== 0) {
-        resultsText = `${resultsCount}results`;
-      }
-      else {
-        resultsText = 'Nosearchresultsfound';
-      }
-    }
-    setResultsIndicator(resultsText);
+    updateResultsIndicator(sortedProducts.length, searchTerm);
   }
 
-  function setResultsIndicator(text: string) {
+  function updateResultsIndicator(resultsCount: number, search: string) {
     const resultsIndicator = document.getElementById('results-indicator');
-    if (resultsIndicator !== null) {
-      resultsIndicator.innerText = text;
+    let resultsText = resultsCount === 1 ? '1 result' : `${resultsCount} results`;
+    if (search === '') {
+      resultsText = resultsCount === 1 ? '1 product' : `${resultsCount} products`;
+    } else if (resultsCount === 0) {
+      resultsText = 'No search results found';
+    }
+    if (resultsIndicator) {
+      resultsIndicator.innerText = resultsText;
     }
   }
 
