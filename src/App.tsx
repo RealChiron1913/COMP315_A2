@@ -24,8 +24,11 @@ function App() {
   // ===== Hooks =====
   useEffect(() => {
     updateSearchedProducts();
-    console.log('BasketItems updated:', BasketItems);
-  }, [sortOrder, searchTerm, inStock, BasketItems]);
+  }, [sortOrder, searchTerm, inStock]);
+  useEffect(() => {
+    console.log(BasketItems);
+    updateBasketArea();
+  }, [BasketItems]);
 
 
 
@@ -118,17 +121,72 @@ function App() {
     setBasketItems(currentItems => {
       const itemExists = currentItems.find(item => item.id === product.id);
       if (itemExists) {
-        return currentItems.map(item => 
+        return currentItems.map(item =>
           item.id === product.id ? { ...item, quantity: item.quantity + 1 } : item
         );
       } else {
-        return [...currentItems, {...product, quantity: 1}];
+        return [...currentItems, { ...product, quantity: 1 }];
       }
     });
     console.log(BasketItems);
   }
-  
 
+
+  function updateBasketArea() {
+    const shoppingArea = document.getElementById('basket-products-area');
+
+    if (shoppingArea !== null) {
+      shoppingArea.innerHTML = '';
+
+      if (BasketItems.length === 0) {
+        shoppingArea.innerHTML = '<p>Your basket is empty</p>';
+      } else {
+        BasketItems.forEach(item => {
+          const shoppingRow = document.createElement('div');
+          shoppingRow.className = 'shopping-row';
+
+          // [P roductname]([P roductprice]) − [P roductquantity]
+          const shoppingInformation = document.createElement('div');
+          shoppingInformation.className = 'shopping-information';
+          shoppingInformation.innerText = `${item.name} (£${item.price}) - ${item.quantity}`;
+
+          const removeButton = document.createElement('button');
+          removeButton.innerText = 'Remove';
+          removeButton.onclick = () => removeFromBasket(item);
+
+
+          shoppingRow.appendChild(shoppingInformation);
+          shoppingRow.appendChild(removeButton);
+          shoppingArea.appendChild(shoppingRow);
+        });
+      }
+      // At the bottom of the shopping −area div should be a paragraph tag with the total cost of the shopping
+      // basket. This should be in the form of T otal : [T otalbasketcost]. This value should be shown to 2 decimal places.
+      const totalCost = BasketItems.reduce((total, item) => total + item.price * item.quantity, 0);
+      const totalCostParagraph = document.createElement('p');
+      totalCostParagraph.innerText = `Total: £${totalCost.toFixed(2)}`;
+      shoppingArea.appendChild(totalCostParagraph);
+    }
+  }
+
+  function removeFromBasket(product: Product) {
+    console.log('Removing from basket:', product)
+    setBasketItems(currentItems => {
+      const itemExists = currentItems.find(item => item.id === product.id);
+      if (itemExists) {
+        if (itemExists.quantity > 1) {
+          return currentItems.map(item =>
+            item.id === product.id ? { ...item, quantity: item.quantity - 1 } : item
+          );
+        } else {
+          return currentItems.filter(item => item.id !== product.id);
+        }
+      } else {
+        return currentItems;
+      }
+    });
+    console.log(BasketItems);
+  }
 
 
 
@@ -145,7 +203,9 @@ function App() {
           <div id="exit-area">
             <p id="exit-icon" onClick={hideBasket}>x</p>
           </div>
-          <p>Your basket is empty</p>
+          <div id="basket-products-area">
+            <p>Your basket is empty</p>
+          </div>
         </div>
       </div>
       <div id="search-bar">
