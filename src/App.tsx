@@ -49,34 +49,47 @@ function App() {
 
   // ===== Search =====
   function updateSearchedProducts() {
+    // Filter the products
     let filteredProducts = itemList.filter(product => {
       const matchesSearch = product.name.toLowerCase().includes(searchTerm.toLowerCase());
       const inStockCheck = !inStock || (inStock && product.quantity > 0);
       return matchesSearch && inStockCheck;
     });
-
+    // Sort the filtered products
     const sortedProducts = sort(filteredProducts, sortOrder);
 
+    // Update the state
     setSearchedProducts(sortedProducts);
 
+    // Update the results indicator
     updateResultsIndicator(sortedProducts.length, searchTerm);
   }
 
   function updateResultsIndicator(resultsCount: number, search: string) {
+    // Update the results indicator
     const resultsIndicator = document.getElementById('results-indicator');
+
+    // Singular or plural
     let resultsText = resultsCount === 1 ? '1 result' : `${resultsCount} results`;
+
     if (search === '') {
+
       resultsText = resultsCount === 1 ? '1 product' : `${resultsCount} products`;
+
     } else if (resultsCount === 0) {
-      resultsText = 'No search results found';
+      // No results found
+      resultsText = 'Nosearchresultsfound';
     }
     if (resultsIndicator) {
+
       resultsIndicator.innerText = resultsText;
+      
     }
   }
 
 
   function sort(products: Product[], sortOrder: string) {
+    // Sort the products
     switch (sortOrder) {
       case 'AtoZ':
         products.sort((a, b) => a.name.localeCompare(b.name));
@@ -104,7 +117,7 @@ function App() {
 
 
   function addToBasket(product: Product) {
-    console.log('Adding to basket:', product)
+    // Add the product to the BasketItems
     setBasketItems(currentItems => {
       const itemExists = currentItems.find(item => item.id === product.id);
       if (itemExists) {
@@ -115,11 +128,11 @@ function App() {
         return [...currentItems, { ...product, quantity: 1 }];
       }
     });
-    console.log(BasketItems);
   }
 
 
   function updateBasketArea() {
+    // Update the basket area
     const shoppingArea = document.getElementById('basket-products-area');
 
     if (shoppingArea !== null) {
@@ -132,7 +145,7 @@ function App() {
           const shoppingRow = document.createElement('div');
           shoppingRow.className = 'shopping-row';
 
-          // [P roductname]([P roductprice]) − [P roductquantity]
+          // [Productname]([Productprice]) − [Productquantity]
           const shoppingInformation = document.createElement('div');
           shoppingInformation.className = 'shopping-information';
           shoppingInformation.innerText = `${item.name} (£${item.price}) - ${item.quantity}`;
@@ -141,14 +154,12 @@ function App() {
           removeButton.innerText = 'Remove';
           removeButton.onclick = () => removeFromBasket(item);
 
-
           shoppingRow.appendChild(shoppingInformation);
           shoppingRow.appendChild(removeButton);
           shoppingArea.appendChild(shoppingRow);
         });
       }
-      // At the bottom of the shopping −area div should be a paragraph tag with the total cost of the shopping
-      // basket. This should be in the form of T otal : [T otalbasketcost]. This value should be shown to 2 decimal places.
+
       const totalCost = BasketItems.reduce((total, item) => total + item.price * item.quantity, 0);
       const totalCostParagraph = document.createElement('p');
       totalCostParagraph.innerText = `Total: £${totalCost.toFixed(2)}`;
@@ -157,7 +168,8 @@ function App() {
   }
 
   function removeFromBasket(product: Product) {
-    console.log('Removing from basket:', product)
+    // Remove the product from the BasketItems
+    // console.log('Removing from basket:', product)
     setBasketItems(currentItems => {
       const itemExists = currentItems.find(item => item.id === product.id);
       if (itemExists) {
