@@ -5,7 +5,7 @@ import './e-commerce-stylesheet.css'
 
 type Product = {
   id: number
-	name: string
+  name: string
   price: number
   category: string
   quantity: number
@@ -14,40 +14,110 @@ type Product = {
 }
 
 function App() {
+  const originalProducts = itemList;
   const [searchTerm, setSearchTerm] = useState<string>('');
-  const [searchedProducts, setSearchedProducts] = useState<Product[]>(itemList);
+  const [searchedProducts, setSearchedProducts] = useState<Product[]>(sort(originalProducts, 'AtoZ'));
+  const [sortOrder, setSortOrder] = useState<string>('AtoZ');
+  const [inStock, setInStock] = useState<boolean>(false);
 
   // ===== Hooks =====
-  useEffect(() => updateSearchedProducts(), [searchTerm]);
+  useEffect(() => {
+    updateSearchedProducts();
+  }, [sortOrder, searchTerm, inStock]);
+
+
 
   // ===== Basket management =====
-  function showBasket(){
+  function showBasket() {
     let areaObject = document.getElementById('shopping-area');
-    if(areaObject !== null){
-      areaObject.style.display='block';
+    if (areaObject !== null) {
+      areaObject.style.display = 'block';
     }
   }
 
-  function hideBasket(){
+  function hideBasket() {
     let areaObject = document.getElementById('shopping-area');
-    if(areaObject !== null){
-      areaObject.style.display='none';
+    if (areaObject !== null) {
+      areaObject.style.display = 'none';
     }
   }
 
   // ===== Search =====
-  function updateSearchedProducts(){
-    let holderList: Product[] = itemList;
-
-    setSearchedProducts(holderList.filter((product: Product) =>
-      product.name.toLowerCase().includes(searchTerm.toLowerCase())
-    ));
+  function updateSearchedProducts() {
+    // 过滤列表
+    let filteredProducts = itemList.filter(product => {
+      const matchesSearch = product.name.toLowerCase().includes(searchTerm.toLowerCase());
+      const inStockCheck = !inStock || (inStock && product.quantity > 0);
+      return matchesSearch && inStockCheck;
+    });
+  
+    const sortedProducts = sort(filteredProducts, sortOrder);
+  
+    setSearchedProducts(sortedProducts);
+  
+    const resultsCount = sortedProducts.length;
+    let resultsText = '';
+    if (searchTerm === '') {
+      if (resultsCount === 1) {
+        resultsText = '1product';
+      }else{
+        resultsText = `${resultsCount}products`;
+      }
+    }
+    else{
+      if (resultsCount === 1) {
+        resultsText = '1result';
+      }else if(resultsCount !== 0){
+        resultsText = `${resultsCount}results`;
+      }
+      else{
+        resultsText = 'Nosearchresultsfound';
+      }
+    }
+    setResultsIndicator(resultsText);
   }
 
- 
+  function setResultsIndicator(text: string) {
+    const resultsIndicator = document.getElementById('results-indicator');
+    if (resultsIndicator !== null) {
+      resultsIndicator.innerText = text;
+    }
+  }
+
+
+  function sort(products: Product[], sortOrder: string) {
+    console.log(sortOrder);
+    switch (sortOrder) {
+      case 'AtoZ':
+        products.sort((a, b) => a.name.localeCompare(b.name));
+        break;
+      case 'ZtoA':
+        products.sort((a, b) => b.name.localeCompare(a.name));
+        break;
+      case '£LtoH':
+        products.sort((a, b) => a.price - b.price);
+        break;
+      case '£HtoL':
+        products.sort((a, b) => b.price - a.price);
+        break;
+      case '*LtoH':
+        products.sort((a, b) => a.rating - b.rating);
+        break;
+      case '*HtoL':
+        products.sort((a, b) => b.rating - a.rating);
+        break;
+      default:
+        break;
+    }
+    return products;
+  }
+
+
+
+
 
   return (
-    <div id="container"> 
+    <><div id="container">
       <div id="logo-bar">
         <div id="logo-area">
           <img src="./src/assets/logo.png"></img>
@@ -65,7 +135,7 @@ function App() {
       <div id="search-bar">
         <input type="text" placeholder="Search..." onChange={changeEventObject => setSearchTerm(changeEventObject.target.value)}></input>
         <div id="control-area">
-          <select>
+          <select onChange={(e) => setSortOrder(e.target.value)}>
             <option value="AtoZ">By name (A - Z)</option>
             <option value="ZtoA">By name (Z - A)</option>
             <option value="£LtoH">By price (low - high)</option>
@@ -73,14 +143,16 @@ function App() {
             <option value="*LtoH">By rating (low - high)</option>
             <option value="*HtoL">By rating (high - low)</option>
           </select>
-          <input id="inStock" type="checkbox"></input>
+          <input id="inStock" type="checkbox" onChange={(e) => setInStock(e.target.checked)}></input>
           <label htmlFor="inStock">In stock</label>
         </div>
       </div>
       <p id="results-indicator"></p>
-      <ProductList itemList={searchedProducts}/>
+      <ProductList itemList={searchedProducts} />
     </div>
+    </>
   )
+
 }
 
 export default App
