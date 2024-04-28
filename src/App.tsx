@@ -26,7 +26,7 @@ function App() {
     updateSearchedProducts();
   }, [sortOrder, searchTerm, inStock]);
   useEffect(() => {
-    console.log(BasketItems);
+    // console.log(BasketItems);
     updateBasketArea();
   }, [BasketItems]);
 
