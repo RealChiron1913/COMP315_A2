@@ -19,11 +19,13 @@ function App() {
   const [searchedProducts, setSearchedProducts] = useState<Product[]>(sort(originalProducts, 'AtoZ'));
   const [sortOrder, setSortOrder] = useState<string>('AtoZ');
   const [inStock, setInStock] = useState<boolean>(false);
+  const [BasketItems, setBasketItems] = useState<Product[]>([]);
 
   // ===== Hooks =====
   useEffect(() => {
     updateSearchedProducts();
-  }, [sortOrder, searchTerm, inStock]);
+    console.log('BasketItems updated:', BasketItems);
+  }, [sortOrder, searchTerm, inStock, BasketItems]);
 
 
 
@@ -44,33 +46,32 @@ function App() {
 
   // ===== Search =====
   function updateSearchedProducts() {
-    // 过滤列表
     let filteredProducts = itemList.filter(product => {
       const matchesSearch = product.name.toLowerCase().includes(searchTerm.toLowerCase());
       const inStockCheck = !inStock || (inStock && product.quantity > 0);
       return matchesSearch && inStockCheck;
     });
-  
+
     const sortedProducts = sort(filteredProducts, sortOrder);
-  
+
     setSearchedProducts(sortedProducts);
-  
+
     const resultsCount = sortedProducts.length;
     let resultsText = '';
     if (searchTerm === '') {
       if (resultsCount === 1) {
         resultsText = '1product';
-      }else{
+      } else {
         resultsText = `${resultsCount}products`;
       }
     }
-    else{
+    else {
       if (resultsCount === 1) {
         resultsText = '1result';
-      }else if(resultsCount !== 0){
+      } else if (resultsCount !== 0) {
         resultsText = `${resultsCount}results`;
       }
-      else{
+      else {
         resultsText = 'Nosearchresultsfound';
       }
     }
@@ -86,7 +87,6 @@ function App() {
 
 
   function sort(products: Product[], sortOrder: string) {
-    console.log(sortOrder);
     switch (sortOrder) {
       case 'AtoZ':
         products.sort((a, b) => a.name.localeCompare(b.name));
@@ -112,6 +112,22 @@ function App() {
     return products;
   }
 
+
+  function addToBasket(product: Product) {
+    console.log('Adding to basket:', product)
+    setBasketItems(currentItems => {
+      const itemExists = currentItems.find(item => item.id === product.id);
+      if (itemExists) {
+        return currentItems.map(item => 
+          item.id === product.id ? { ...item, quantity: item.quantity + 1 } : item
+        );
+      } else {
+        return [...currentItems, {...product, quantity: 1}];
+      }
+    });
+    console.log(BasketItems);
+  }
+  
 
 
 
@@ -148,7 +164,7 @@ function App() {
         </div>
       </div>
       <p id="results-indicator"></p>
-      <ProductList itemList={searchedProducts} />
+      <ProductList itemList={searchedProducts} onAddToBasket={addToBasket} />
     </div>
     </>
   )

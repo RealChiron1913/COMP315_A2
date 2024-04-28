@@ -1,5 +1,10 @@
+
+
+
 type ContentAreaProps = {
     itemList: Product[];
+	onAddToBasket: (product: Product) => void; // Function to handle adding items to the basket
+
 }
 
 type Product = {
@@ -14,7 +19,10 @@ type Product = {
 
 
 
-export const ProductList = ({ itemList }: ContentAreaProps) => {
+
+
+
+export const ProductList = ({ itemList, onAddToBasket }: ContentAreaProps) => {
     return (
         <div id="productList">
             {itemList.map((item) => (
@@ -25,7 +33,7 @@ export const ProductList = ({ itemList }: ContentAreaProps) => {
                     </div>
                     <img src={`./src/Assets/Product_Images/${item.image_link}`} alt={item.name}></img>
                     {item.quantity > 0 ? (
-                        <button value={item.id}>Add to basket</button>
+                        <button onClick={() => onAddToBasket(item)} value={item.id}>Add to basket</button>
                     ) : (
                         <button disabled={true}>Out of stock</button>
                     )}
@@ -34,3 +42,4 @@ export const ProductList = ({ itemList }: ContentAreaProps) => {
         </div>
     );
 }
+
